@@ -122,8 +122,12 @@
     if (cache[id]) return cache[id];
     const res = await fetch(F.CARS[id].file); if (!res.ok) throw new Error("file " + res.status);
     const json = await res.json(), bin = Uint8Array.from(atob(json.gz), c => c.charCodeAt(0));
-    if (typeof DecompressionStream === "undefined") throw new Error("this browser cannot unpack the car file");
-    const raw = new Uint8Array(await new Response(new Blob([bin]).stream().pipeThrough(new DecompressionStream("gzip"))).arrayBuffer());
+    let raw;
+    if (typeof DecompressionStream !== "undefined") raw = new Uint8Array(await new Response(new Blob([bin]).stream().pipeThrough(new DecompressionStream("gzip"))).arrayBuffer());
+    else {                                                   // older browsers: fetch a small unzip library on demand
+      if (!window.pako) await new Promise((ok, no) => { const s = document.createElement("script"); s.src = "https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"; s.onload = ok; s.onerror = () => no(new Error("this browser cannot unpack the car file")); document.head.appendChild(s); });
+      raw = window.pako.ungzip(bin);
+    }
     return cache[id] = F.decodeCar(json, raw);
   }
   function startSpec(lp) { const s = {}; for (const ax of ["F", "R"]) { s[ax] = Object.assign({ sp: 0, arm: 0 }, car.start[ax]); if (s[ax].rh == null) s[ax].rh = Math.round(lp[ax].topR / 5) * 5; } return s; }
