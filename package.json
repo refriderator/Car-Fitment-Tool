@@ -1,0 +1,1 @@
+{ "name": "car-fitment-tool", "private": true, "description": "Mesh packing and checks for the car fitment tool", "dependencies": { "meshoptimizer": "^0.22.0" } }

@@ -1,0 +1,282 @@
+<title>Car Fitment Tool</title>
+<style>
+/* Layout: a setup sheet beside a tape frame. Controls run down a column on the left; the 3D car sits in a deep-red field that stays
+   pinned while the read-outs scroll under it. Clipping Point, Night only. */
+:root{
+  color-scheme:dark;
+  --bg-000:#050506; --bg-100:#111114; --bg-200:#1d1d22; --line:#34343d; --border:#e6e6e3; --ink:#f5f3ee; --ink-muted:#a9a8b3;
+  --red:#ea0000; --red-field:#c30000; --red-deep:#470408; --red-ink:#ff4242; --on-red:#ffffff;
+  --key:#050506; --key-line:#34343d; --plate:#1d1d22; --on-key:#f5f3ee; --on-key-muted:#a9a8b3; --on-key-red:#ff4141;
+  --steel:#97979b; --highlight:#d9d9d6; --on-highlight:#111114; --focus:var(--ink);
+  --shadow-hard:4px 4px 0 #050506; --shadow-hard-lg:8px 8px 0 #050506;
+  --glow-red:0 0 10px 0 rgba(234,0,0,.6), inset 0 0 8px 0 rgba(234,0,0,.35);
+  --focus-ring:0 0 0 2px #050506, 0 0 0 4px #650000;
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-6:24px; --space-8:32px; --space-12:48px;
+  --radius-none:0; --radius-sm:2px; --radius-plate:10px; --radius-pill:999px;
+  --stroke-hair:1px; --stroke-rule:2px; --scan-gap:2px; --scan-line:1px; --chroma-offset:3px; --chroma-offset-sm:1px; --tear-offset:6px;
+  --display-embolden:0.02em; --scanline-alpha:0.4; --slant:-40deg;
+  --font-display:Michroma,"Eurostile Extended","Arial Black",sans-serif;
+  --font-body:"Chakra Petch","Helvetica Neue",Arial,sans-serif;
+  --font-mono:VT323,"Courier New",monospace;
+  --cp-grad-red:radial-gradient(130% 180% at 12% 55%, var(--red-field) 0%, var(--red-field) 22%, var(--red-deep) 100%);
+  --cp-grad-deep:linear-gradient(100deg, var(--red-deep) 0%, var(--key) 100%);
+  --viewh:clamp(300px,56vh,640px);
+}
+@supports (color:color(display-p3 1 0 0)){ :root{ --red:color(display-p3 0.84 0.03 0.08); --red-field:color(display-p3 0.7 0.02 0.06);
+  --glow-red:0 0 10px 0 color(display-p3 0.84 0.03 0.08 / 0.6), inset 0 0 8px 0 color(display-p3 0.84 0.03 0.08 / 0.35); } }
+/*FONTS*/
+html,body{height:100%}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg-000);color:var(--ink);font:400 16px/24px var(--font-body);padding-inline:var(--space-4);padding-block:var(--space-4)}
+button,select,input{font:inherit;color:inherit}
+a{color:var(--ink);text-decoration:underline}
+.display-headline{font:400 36px/1.1 var(--font-display);letter-spacing:.03em}
+.display-title{font:400 18px/1.25 var(--font-display);letter-spacing:.08em}
+.display-headline,.display-title{-webkit-text-stroke:var(--display-embolden) currentColor;text-transform:uppercase;margin:0;text-wrap:balance}
+.small{font:400 14px/20px var(--font-body)}
+.control-label{font:500 16px/20px var(--font-body);letter-spacing:.08em}
+.tech-data{font:400 20px/20px var(--font-mono);letter-spacing:.06em}
+.tech-caption,.label{font:400 18px/20px var(--font-mono);letter-spacing:.06em}
+.callout{font:italic 400 24px/24px var(--font-mono);letter-spacing:.06em}
+.cp-readout{text-shadow:calc(var(--chroma-offset-sm) * -1) 0 0 var(--cp-g1,var(--red)), var(--chroma-offset-sm) 0 0 var(--cp-g2,var(--steel))}
+
+/* scanlines and torn lines, from the kit */
+.cp-scan,.cp-banner::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(to bottom,transparent 0 var(--scan-gap),var(--cp-scan,var(--key)) var(--scan-gap) calc(var(--scan-gap) + var(--scan-line)));opacity:var(--scanline-alpha)}
+.cp-tex-tear,.cp-banner::before{background:
+  linear-gradient(var(--highlight),var(--highlight)) right 96px top calc(38% + 3px) / 28px var(--stroke-rule) no-repeat,
+  linear-gradient(var(--highlight),var(--highlight)) right 150px top calc(71% - 3px) / 16px var(--stroke-rule) no-repeat,
+  linear-gradient(var(--highlight),var(--highlight)) right 24px top calc(8% + 3px) / 40px var(--stroke-rule) no-repeat,
+  linear-gradient(var(--highlight),var(--highlight)) right 16px top 41% / 20px var(--stroke-rule) no-repeat,
+  linear-gradient(var(--highlight),var(--highlight)) right 8px top calc(50% + 4px) / 56px var(--stroke-rule) no-repeat,
+  linear-gradient(var(--highlight),var(--highlight)) right 140px top calc(60% + 3px) / 24px var(--stroke-rule) no-repeat,
+  linear-gradient(var(--highlight),var(--highlight)) right 0 top calc(82% + 3px) / 32px var(--stroke-rule) no-repeat,
+  linear-gradient(var(--highlight),var(--highlight)) right 200px top 44% / 12px var(--stroke-rule) no-repeat,
+  linear-gradient(var(--cp-tex,var(--line)),var(--cp-tex,var(--line))) right 0 top 8% / 170px var(--stroke-hair) no-repeat,
+  linear-gradient(var(--cp-tex,var(--line)),var(--cp-tex,var(--line))) right 170px top calc(8% + 3px) / 70px var(--stroke-hair) no-repeat,
+  linear-gradient(var(--cp-tex,var(--line)),var(--cp-tex,var(--line))) right 30px top 19% / 90px var(--stroke-hair) no-repeat,
+  linear-gradient(var(--cp-tex,var(--line)),var(--cp-tex,var(--line))) right 0 top 29% / 60px var(--stroke-hair) no-repeat,
+  linear-gradient(var(--cp-tex,var(--line)),var(--cp-tex,var(--line))) right 60px top calc(29% - 3px) / 180px var(--stroke-hair) no-repeat,
+  linear-gradient(var(--cp-tex,var(--line)),var(--cp-tex,var(--line))) right 40px top 38% / 56px var(--stroke-hair) no-repeat,
+  linear-gradient(var(--cp-tex,var(--line)),var(--cp-tex,var(--line))) right 124px top calc(38% - 2px) / 130px var(--stroke-hair) no-repeat,
+  linear-gradient(var(--cp-tex,var(--line)),var(--cp-tex,var(--line))) right 0 top 50% / 220px var(--stroke-hair) no-repeat,
+  linear-gradient(var(--cp-tex,var(--line)),var(--cp-tex,var(--line))) right 220px top calc(50% + 4px) / 50px var(--stroke-hair) no-repeat,
+  linear-gradient(var(--cp-tex,var(--line)),var(--cp-tex,var(--line))) right 16px top 60% / 110px var(--stroke-hair) no-repeat,
+  linear-gradient(var(--cp-tex,var(--line)),var(--cp-tex,var(--line))) right 0 top 71% / 90px var(--stroke-hair) no-repeat,
+  linear-gradient(var(--cp-tex,var(--line)),var(--cp-tex,var(--line))) right 90px top calc(71% + 4px) / 120px var(--stroke-hair) no-repeat,
+  linear-gradient(var(--cp-tex,var(--line)),var(--cp-tex,var(--line))) right 50px top 82% / 150px var(--stroke-hair) no-repeat,
+  linear-gradient(var(--cp-tex,var(--line)),var(--cp-tex,var(--line))) right 0 top 92% / 130px var(--stroke-hair) no-repeat}
+
+/* banner */
+.cp-banner{position:relative;isolation:isolate;overflow:hidden;display:flex;flex-direction:column;gap:var(--space-3);padding:var(--space-6);border:var(--stroke-rule) solid var(--border)}
+.cp-banner::before{content:"";position:absolute;inset:0;z-index:-2}
+.cp-banner::after{z-index:-1}
+.cp-banner-red{background:var(--cp-grad-red);color:var(--on-red);--cp-tex:var(--red);--cp-g1:var(--key);--cp-g2:var(--red-deep)}
+.cp-banner__kicker{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:var(--space-3);text-transform:uppercase}
+.cp-banner h1{text-shadow:calc(var(--chroma-offset) * -1) 0 0 var(--cp-g1), var(--chroma-offset) 0 0 var(--cp-g2)}
+.cp-banner__sub{margin:0;text-transform:uppercase}
+
+/* button and badge */
+.cp-btn{appearance:none;-webkit-appearance:none;position:relative;isolation:isolate;display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 var(--space-6);border:0;background:none;cursor:pointer;color:var(--ink);text-transform:uppercase;white-space:nowrap;transition:transform 80ms linear}
+.cp-btn::before{content:"";position:absolute;inset:0;z-index:-1;border:var(--stroke-rule) solid var(--border);border-radius:0;background:var(--bg-200);box-shadow:var(--shadow-hard);transition:box-shadow 80ms linear}
+.cp-btn-primary{color:var(--red-ink)}
+.cp-btn-primary::before{background:var(--bg-000);border-color:var(--red);box-shadow:var(--glow-red),var(--shadow-hard)}
+.cp-btn:hover{transform:translate(-2px,-2px)}
+.cp-btn:hover::before{box-shadow:var(--shadow-hard-lg)}
+.cp-btn-primary:hover::before{box-shadow:var(--glow-red),var(--shadow-hard-lg)}
+.cp-btn:active{transform:translate(2px,2px)}
+.cp-btn:active::before{box-shadow:none}
+.cp-btn:focus-visible{outline:2px solid transparent}
+.cp-btn:focus-visible::before{box-shadow:var(--focus-ring)}
+.cp-badge{display:inline-flex;align-items:center;height:26px;padding:0 var(--space-2);border:var(--stroke-hair) solid var(--border);border-radius:var(--radius-sm);background:var(--bg-200);color:var(--ink);text-transform:uppercase;white-space:nowrap}
+.cp-badge-red{background:transparent;color:var(--red-ink);border-color:var(--red)}
+.cp-badge-highlight{background:var(--ink);color:var(--bg-000);border-color:var(--ink)}
+.view .cp-badge-red{color:var(--on-key-red);background:var(--key)}
+
+/* spec list */
+.cp-spec{display:grid;grid-template-columns:minmax(0,max-content) minmax(0,1fr);margin:0;border-top:var(--stroke-hair) solid var(--line);text-transform:uppercase}
+.cp-spec dt,.cp-spec dd{margin:0;padding:var(--space-1) 0;border-bottom:var(--stroke-hair) solid var(--line)}
+.cp-spec dt{padding-right:var(--space-4);color:var(--ink-muted)}
+.cp-spec dt::after{content:":"}
+.cp-spec dd{overflow-wrap:anywhere;text-align:right}
+.cp-spec dd.bad{color:var(--red-ink)}
+
+/* page */
+.app{display:grid;grid-template-columns:minmax(0,400px) minmax(0,1fr);gap:var(--space-6);height:100%}
+aside{display:flex;flex-direction:column;gap:var(--space-4);min-height:0;overflow:auto;padding-right:var(--space-2)}
+aside>*{flex:none}
+main{min-width:0;min-height:0;overflow:auto;display:grid;gap:var(--space-6);align-content:start}
+.panel{background:var(--bg-100);border:var(--stroke-rule) solid var(--border);padding:var(--space-4);display:grid;gap:var(--space-4);min-width:0}
+fieldset{border:0;padding:0;margin:0;display:grid;gap:var(--space-2);min-width:0}
+legend{padding:0;margin-bottom:var(--space-2);color:var(--ink-muted);text-transform:uppercase}
+.f{display:grid;grid-template-columns:minmax(0,1fr) 92px 34px;gap:var(--space-2);align-items:center}
+.f label{font:400 16px/20px var(--font-body)}
+.f input,.f select{width:100%;height:40px;padding:0 var(--space-2);border:var(--stroke-hair) solid var(--ink-muted);border-radius:0;background:var(--bg-000);color:var(--ink);font:400 16px/24px var(--font-body);font-variant-numeric:tabular-nums}
+.f input{text-align:right}
+.f input[type=file]{text-align:left;padding:var(--space-2);height:auto;font-size:14px;line-height:20px}
+.f .wide{grid-column:2/4}
+.f .u{color:var(--ink-muted);font:400 14px/20px var(--font-body)}
+:is(.f input,.f select,.seg button,input[type=range],a):focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.hint{margin:0;color:var(--ink-muted);font:400 14px/20px var(--font-body);max-width:65ch}
+.row{display:flex;flex-wrap:wrap;gap:var(--space-4) var(--space-6);align-items:center}
+.seg{display:inline-flex;flex-wrap:wrap;border:var(--stroke-hair) solid var(--border);background:var(--bg-000)}
+.seg button{min-height:36px;padding:0 var(--space-3);border:0;border-radius:0;background:none;color:var(--ink-muted);text-transform:uppercase;cursor:pointer}
+.seg button+button{border-left:var(--stroke-hair) solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg-000)}
+.seg.lean{border:0;background:none;padding-left:8px;row-gap:var(--space-1)}
+.seg.lean button{transform:skewX(-20deg);border:var(--stroke-hair) solid var(--border);margin-left:-1px;background:var(--bg-000);padding:0 var(--space-4)}
+.seg.lean button+button{border-left:var(--stroke-hair) solid var(--border)}
+.seg.lean button span{display:inline-block;transform:skewX(20deg)}
+.seg.lean button[aria-pressed="true"]{background:var(--ink);color:var(--bg-000)}
+.sl{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--space-1) var(--space-2);align-items:baseline}
+.sl label{font:400 16px/20px var(--font-body)}
+.sl output{text-transform:uppercase}
+input[type=range]{grid-column:1/-1;width:100%;height:28px;margin:0;background:none;-webkit-appearance:none;appearance:none;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:2px;background:var(--ink-muted)}
+input[type=range]::-moz-range-track{height:2px;background:var(--ink-muted)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:12px;height:24px;margin-top:-11px;border:0;background:var(--ink)}
+input[type=range]::-moz-range-thumb{width:12px;height:24px;border:0;border-radius:0;background:var(--ink)}
+
+/* the frame */
+.view{position:sticky;top:0;z-index:3;height:var(--viewh);background:var(--cp-grad-deep);border:var(--stroke-rule) solid var(--border);overflow:hidden;--cp-tex:var(--red);--cp-g1:var(--red);--cp-g2:var(--steel);color:var(--on-red)}
+.view .tex{position:absolute;inset:0;pointer-events:none}
+.view canvas{position:absolute;inset:0;display:block}
+.msg[hidden]{display:none!important}
+.view .msg{position:absolute;inset:0;display:grid;place-items:center;padding:var(--space-8);text-transform:uppercase;text-align:center;pointer-events:none}
+.frame{position:absolute;inset:var(--space-3) var(--space-4);display:flex;flex-direction:column;justify-content:space-between;gap:var(--space-2);pointer-events:none}
+.osd{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--space-2) var(--space-4);text-transform:uppercase}
+.osd .grp{display:inline-flex;flex-wrap:wrap;align-items:center;gap:var(--space-2) var(--space-3)}
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:var(--space-2)}
+.foot .seg{pointer-events:auto}
+
+/* cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));gap:var(--space-6);align-items:start}
+.card{background:var(--bg-100);border:var(--stroke-rule) solid var(--border);padding:var(--space-4);min-width:0;display:grid;gap:var(--space-3);align-content:start}
+.card.wide{grid-column:1/-1}
+.card header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--space-2)}
+.cut{width:100%;height:300px;display:block;background:var(--key);border:var(--stroke-hair) solid var(--line)}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font:400 14px/20px var(--font-body)}
+th,td{padding:var(--space-1) var(--space-2);border-bottom:var(--stroke-hair) solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--ink-muted);font-weight:400}
+td:first-child,th:first-child{padding-left:0}
+.card ul{margin:0;padding-left:18px;display:grid;gap:var(--space-1);color:var(--ink-muted);font:400 14px/20px var(--font-body);max-width:75ch}
+#copyOut{width:100%;min-height:96px;background:var(--bg-000);color:var(--ink);border:var(--stroke-hair) solid var(--ink-muted);padding:var(--space-2);font:400 14px/20px var(--font-body)}
+
+@media (pointer:coarse){ .seg button{min-height:44px} .f input,.f select{height:44px} }
+@media (max-width:900px){
+  :root{--viewh:clamp(260px,44vh,380px)}
+  html,body{height:auto}
+  .app{display:flex;flex-direction:column;height:auto;gap:var(--space-4)}
+  main{display:contents}
+  aside{display:contents}
+  .cp-banner{order:0}
+  .view{order:1;top:env(safe-area-inset-top,0px)}
+  .panel{order:2}
+  .grid{order:3;gap:var(--space-4)}
+  .display-headline{font-size:28px}
+}
+@media (prefers-reduced-motion:reduce){ .cp-btn,.cp-btn::before{transition:none} }
+</style>
+
+<div class="app">
+<aside>
+  <section class="cp-banner cp-banner-red">
+    <div class="cp-banner__kicker cp-readout tech-caption"><span>PLAY ▶ SP</span><span id="kCar">NB8C</span></div>
+    <h1 class="display-headline">Wheel fitment</h1>
+    <p class="cp-banner__sub callout">Try it before you buy it.</p>
+  </section>
+
+  <div class="panel">
+    <fieldset><legend class="label">Car</legend>
+      <div class="f"><label for="car">Model</label><select id="car" class="wide"></select></div>
+      <p class="hint" id="carNote"></p>
+      <div class="row"><div class="seg label" id="paint" role="group" aria-label="Paint"><button aria-pressed="true" data-v="grey">Grey</button><button aria-pressed="false" data-v="red">Red</button><button aria-pressed="false" data-v="black">Black</button></div>
+      <div class="seg label" id="body" role="group" aria-label="Body"><button aria-pressed="true" data-v="solid">Solid</button><button aria-pressed="false" data-v="ghost">See-through</button></div></div>
+    </fieldset>
+  </div>
+
+  <div class="panel">
+    <div class="row"><div class="seg label" id="axle" role="group" aria-label="Axle"><button aria-pressed="true" data-v="F">Front</button><button aria-pressed="false" data-v="R">Rear</button></div>
+      <div class="seg label"><button id="copyAx" aria-pressed="false">Copy to rear</button></div></div>
+    <fieldset><legend class="label">Wheel</legend>
+      <div class="f"><label for="d">Diameter</label><input id="d" type="number" min="13" max="22" step="1"><span class="u">in</span></div>
+      <div class="f"><label for="j">Width</label><input id="j" type="number" min="5" max="13" step="0.5"><span class="u">in</span></div>
+      <div class="f"><label for="et">Offset (ET)</label><input id="et" type="number" min="-70" max="70" step="1"><span class="u">mm</span></div>
+      <div class="f"><label for="sp">Spacer</label><input id="sp" type="number" min="0" max="60" step="1"><span class="u">mm</span></div>
+    </fieldset>
+    <fieldset><legend class="label">Wheel photo</legend>
+      <div class="f"><label for="face">Your wheel</label><input id="face" class="wide" type="file" accept="image/*"></div>
+      <p class="hint" id="faceNote">Square photo, wheel centred, taken straight on. A PNG with a clear background shows the brake behind.</p>
+      <div class="seg label"><button id="faceOff" type="button" aria-pressed="false">Use the plain wheel</button></div>
+    </fieldset>
+    <fieldset><legend class="label">Tyre</legend>
+      <div class="f"><label for="tw">Width</label><input id="tw" type="number" min="145" max="345" step="10"><span class="u">mm</span></div>
+      <div class="f"><label for="ar">Aspect ratio</label><input id="ar" type="number" min="25" max="80" step="5"><span class="u">%</span></div>
+    </fieldset>
+    <fieldset><legend class="label">Stance</legend>
+      <div class="f"><label for="rh">Hub centre to fender lip</label><input id="rh" type="number" min="200" max="460" step="5"><span class="u">mm</span></div>
+      <div class="f"><label for="camber">Camber</label><input id="camber" type="number" min="-12" max="4" step="0.1"><span class="u">deg</span></div>
+      <div class="f"><label for="arm">Lower arm, longer by</label><input id="arm" type="number" min="-15" max="70" step="1"><span class="u">mm</span></div>
+      <p class="hint" id="stanceNote"></p>
+    </fieldset>
+    <fieldset><legend class="label">Fender</legend>
+      <div class="sl"><label for="flare">Flare, this axle</label><output id="flareO" class="tech-data"></output><input type="range" id="flare" min="0" max="100" step="5" value="0"></div>
+    </fieldset>
+    <fieldset><legend class="label">Steering</legend>
+      <div class="sl"><label for="steer">Front wheels</label><output id="steerO" class="tech-data"></output><input type="range" id="steer" min="-36" max="36" step="1" value="0"></div>
+    </fieldset>
+  </div>
+
+  <div class="panel">
+    <div class="row"><button class="cp-btn cp-btn-primary control-label" id="copy" type="button">Copy spec</button><button class="cp-btn control-label" id="reset" type="button">Reset car</button></div>
+    <textarea id="copyOut" hidden readonly aria-label="Fitment spec"></textarea>
+  </div>
+</aside>
+
+<main>
+  <div class="view" id="view">
+    <div class="tex cp-tex-tear"></div>
+    <div class="cp-scan"></div>
+    <div class="msg tech-data cp-readout" id="msg">Loading ●</div>
+    <div class="frame">
+      <div class="osd tech-caption cp-readout"><span class="grp"><span>● LIVE</span><span id="hudCar"></span></span><span class="grp" id="hudTags"></span></div>
+      <div class="foot"><div class="seg lean label" id="views" role="group" aria-label="Camera">
+        <button aria-pressed="true" data-v="q"><span>3/4</span></button><button aria-pressed="false" data-v="side"><span>Side</span></button><button aria-pressed="false" data-v="front"><span>Front</span></button><button aria-pressed="false" data-v="rear"><span>Rear</span></button><button aria-pressed="false" data-v="line"><span>Down the side</span></button><button aria-pressed="false" data-v="af"><span>Front arch</span></button><button aria-pressed="false" data-v="ar"><span>Rear arch</span></button></div></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <section class="card"><header><h2 class="display-title">Front axle</h2><span id="vF"></span></header><dl class="cp-spec tech-data" id="outF"></dl></section>
+    <section class="card"><header><h2 class="display-title">Rear axle</h2><span id="vR"></span></header><dl class="cp-spec tech-data" id="outR"></dl></section>
+    <section class="card"><header><h2 class="display-title">Front cut</h2><span class="cp-badge label">At the axle</span></header><canvas class="cut" id="cutF" aria-label="Cross-section through the front axle: fender, tyre and wheel, seen from the front."></canvas></section>
+    <section class="card"><header><h2 class="display-title">Rear cut</h2><span class="cp-badge label">At the axle</span></header><canvas class="cut" id="cutR" aria-label="Cross-section through the rear axle: fender, tyre and wheel, seen from the front."></canvas></section>
+    <section class="card wide"><h2 class="display-title">What the numbers mean</h2>
+      <ul>
+        <li><b>Poke / tuck</b> is how far the outermost part of the tyre or rim, in the top third of the wheel, sits outside or inside the fender lip at the top of the arch.</li>
+        <li><b>Tyre to lip</b> is the smallest gap between the tyre and the lip, measured only where the tyre sits under the lip (from the lip edge to 22 mm inboard). <b>Bump to lip</b> is how far the wheel can travel up before that gap closes.</li>
+        <li><b>At lock</b> is the smallest tyre-to-lip gap while the front wheels sweep from full left to full right at this ride height.</li>
+        <li>The red line on the car is the lip the tool measures to. It is found from the 3D body, so flares move it.</li>
+        <li><b>Not checked:</b> the inside of the wheel well, the strut or coilover, the brake caliper against the spokes, and the arms. The wheel wells in these 3D files are not true to the real cars. Use "inner vs factory" to judge the inside.</li>
+        <li>The wheel face is a flat picture. Spoke shape, concavity and caliper clearance are not modelled.</li>
+        <li>Camber and the lower arm are set by hand. Camber does not change with ride height here, and the tyre is not squashed by load.</li>
+        <li>Tyre width on a rim other than its measuring rim is a rule of thumb: about 5 mm per half inch of rim width.</li>
+      </ul>
+    </section>
+    <section class="card wide"><h2 class="display-title">Where the cars come from</h2>
+      <div class="tw"><table id="src"></table></div>
+      <ul>
+        <li>Bodies are the 3D files you supplied, with wheels, brakes and interiors removed and the mesh thinned for the browser. They are placeholders: each is one particular build, not a factory car.</li>
+        <li>Hub faces are placed from the factory track and factory offset. That is an assumption: a modified car may run longer arms or different hubs.</li>
+        <li>The ride height each page opens with is my choice so the starting wheels clear. The pose stored in each 3D file is shown under Stance.</li>
+        <li>Pivot heights for camber and steering come from each file's physics data. The IS300 file models the front as a strut; the real car has double wishbones.</li>
+      </ul>
+    </section>
+  </div>
+</main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>/*CORE*/</script>
+<script>/*APP*/</script>
