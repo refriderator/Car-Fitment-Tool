@@ -16,10 +16,13 @@
   --stroke-hair:1px; --stroke-rule:2px; --scan-gap:2px; --scan-line:1px; --chroma-offset:3px; --chroma-offset-sm:1px; --tear-offset:6px;
   --display-embolden:0.02em; --scanline-alpha:0.4; --slant:-40deg;
   --font-display:Michroma,"Eurostile Extended","Arial Black",sans-serif;
+  --font-script:STXingkai,"Xingkai SC",Yellowtail,"Brush Script MT",cursive;
   --font-body:"Chakra Petch","Helvetica Neue",Arial,sans-serif;
   --font-mono:VT323,"Courier New",monospace;
-  --cp-grad-red:radial-gradient(130% 180% at 12% 55%, var(--red-field) 0%, var(--red-field) 22%, var(--red-deep) 100%);
-  --cp-grad-deep:linear-gradient(100deg, var(--red-deep) 0%, var(--key) 100%);
+  --dusk:#1b1464;          /* the one second hue: an indigo the red falls into, on the banner and the 3D frame only */
+  --cp-grad-red:radial-gradient(130% 180% at 12% 55%, var(--red-field) 0%, var(--red-field) 24%, #74063c 62%, var(--dusk) 100%);
+  --cp-grad-deep:linear-gradient(100deg, var(--red-deep) 0%, #230f45 52%, var(--key) 100%);
+  --radius-win:6px;        /* panels, cards, the banner and the 3D frame */
   --viewh:clamp(300px,56vh,640px);
 }
 @supports (color:color(display-p3 1 0 0)){ :root{ --red:color(display-p3 0.84 0.03 0.08); --red-field:color(display-p3 0.7 0.02 0.06);
@@ -33,6 +36,7 @@ a{color:var(--ink);text-decoration:underline}
 .display-headline{font:400 36px/1.1 var(--font-display);letter-spacing:.03em}
 .display-title{font:400 18px/1.25 var(--font-display);letter-spacing:.08em}
 .display-headline,.display-title{-webkit-text-stroke:var(--display-embolden) currentColor;text-transform:uppercase;margin:0;text-wrap:balance}
+.script-headline{font:400 64px/0.95 var(--font-script);letter-spacing:0;margin:0}
 .small{font:400 14px/20px var(--font-body)}
 .control-label{font:500 16px/20px var(--font-body);letter-spacing:.08em}
 .tech-data{font:400 20px/20px var(--font-mono);letter-spacing:.06em}
@@ -68,10 +72,10 @@ a{color:var(--ink);text-decoration:underline}
   linear-gradient(var(--cp-tex,var(--line)),var(--cp-tex,var(--line))) right 0 top 92% / 130px var(--stroke-hair) no-repeat}
 
 /* banner */
-.cp-banner{position:relative;isolation:isolate;overflow:hidden;display:flex;flex-direction:column;gap:var(--space-3);padding:var(--space-6);border:var(--stroke-rule) solid var(--border)}
+.cp-banner{border-radius:var(--radius-win);position:relative;isolation:isolate;overflow:hidden;display:flex;flex-direction:column;gap:var(--space-3);padding:var(--space-6);border:var(--stroke-rule) solid var(--border)}
 .cp-banner::before{content:"";position:absolute;inset:0;z-index:-2}
 .cp-banner::after{z-index:-1}
-.cp-banner-red{background:var(--cp-grad-red);color:var(--on-red);--cp-tex:var(--red);--cp-g1:var(--key);--cp-g2:var(--red-deep)}
+.cp-banner-red{background:var(--cp-grad-red);color:var(--on-red);--cp-tex:var(--red);--cp-g1:var(--key);--cp-g2:var(--dusk)}
 .cp-banner__kicker{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:var(--space-3);text-transform:uppercase}
 .cp-banner h1{text-shadow:calc(var(--chroma-offset) * -1) 0 0 var(--cp-g1), var(--chroma-offset) 0 0 var(--cp-g2)}
 .cp-banner__sub{margin:0;text-transform:uppercase}
@@ -106,7 +110,7 @@ a{color:var(--ink);text-decoration:underline}
 aside{display:flex;flex-direction:column;gap:var(--space-4);min-height:0;overflow:auto;padding-right:var(--space-2)}
 aside>*{flex:none}
 main{min-width:0;min-height:0;overflow:auto;display:grid;gap:var(--space-6);align-content:start}
-.panel{background:var(--bg-100);border:var(--stroke-rule) solid var(--border);padding:var(--space-4);display:grid;gap:var(--space-4);min-width:0}
+.panel{border-radius:var(--radius-win);background:var(--bg-100);border:var(--stroke-rule) solid var(--border);padding:var(--space-4);display:grid;gap:var(--space-4);min-width:0}
 fieldset{border:0;padding:0;margin:0;display:grid;gap:var(--space-2);min-width:0}
 legend{padding:0;margin-bottom:var(--space-2);color:var(--ink-muted);text-transform:uppercase}
 .f{display:grid;grid-template-columns:minmax(0,1fr) 92px 34px;gap:var(--space-2);align-items:center}
@@ -138,7 +142,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
 input[type=range]::-moz-range-thumb{width:12px;height:24px;border:0;border-radius:0;background:var(--ink)}
 
 /* the frame */
-.view{position:sticky;top:0;z-index:3;height:var(--viewh);background:var(--cp-grad-deep);border:var(--stroke-rule) solid var(--border);overflow:hidden;--cp-tex:var(--red);--cp-g1:var(--red);--cp-g2:var(--steel);color:var(--on-red)}
+.view{border-radius:var(--radius-win);position:sticky;top:0;z-index:3;height:var(--viewh);background:var(--cp-grad-deep);border:var(--stroke-rule) solid var(--border);overflow:hidden;--cp-tex:var(--red);--cp-g1:var(--red);--cp-g2:var(--steel);color:var(--on-red)}
 .view .tex{position:absolute;inset:0;pointer-events:none}
 .view canvas{position:absolute;inset:0;display:block}
 .msg[hidden]{display:none!important}
@@ -151,7 +155,7 @@ input[type=range]::-moz-range-thumb{width:12px;height:24px;border:0;border-radiu
 
 /* cards */
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));gap:var(--space-6);align-items:start}
-.card{background:var(--bg-100);border:var(--stroke-rule) solid var(--border);padding:var(--space-4);min-width:0;display:grid;gap:var(--space-3);align-content:start}
+.card{border-radius:var(--radius-win);background:var(--bg-100);border:var(--stroke-rule) solid var(--border);padding:var(--space-4);min-width:0;display:grid;gap:var(--space-3);align-content:start}
 .card.wide{grid-column:1/-1}
 .card header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--space-2)}
 .cut{width:100%;height:300px;display:block;background:var(--key);border:var(--stroke-hair) solid var(--line)}
@@ -174,7 +178,7 @@ td:first-child,th:first-child{padding-left:0}
   .view{order:1;top:env(safe-area-inset-top,0px)}
   .panel{order:2}
   .grid{order:3;gap:var(--space-4)}
-  .display-headline{font-size:28px}
+  .script-headline{font-size:52px}
 }
 @media (prefers-reduced-motion:reduce){ .cp-btn,.cp-btn::before{transition:none} }
 </style>
@@ -183,8 +187,8 @@ td:first-child,th:first-child{padding-left:0}
 <aside>
   <section class="cp-banner cp-banner-red">
     <div class="cp-banner__kicker cp-readout tech-caption"><span>PLAY ▶ SP</span><span id="kCar">NB8C</span></div>
-    <h1 class="display-headline">Wheel fitment</h1>
-    <p class="cp-banner__sub callout">Try it before you buy it.</p>
+    <h1 class="script-headline">Wheel fitment</h1>
+    <p class="cp-banner__sub tech-data">Try it before you buy it.</p>
   </section>
 
   <div class="panel">
@@ -207,15 +211,15 @@ td:first-child,th:first-child{padding-left:0}
     </fieldset>
     <fieldset><legend class="label">Wheel photo</legend>
       <div class="f"><label for="face">Your wheel</label><input id="face" class="wide" type="file" accept="image/*"></div>
-      <p class="hint" id="faceNote">Square photo, wheel centred, taken straight on. A PNG with a clear background shows the brake behind.</p>
+      <p class="hint" id="faceNote">Square photo, wheel centered, taken straight on. A PNG with a clear background shows the brake behind.</p>
       <div class="seg label"><button id="faceOff" type="button" aria-pressed="false">Use the plain wheel</button></div>
     </fieldset>
-    <fieldset><legend class="label">Tyre</legend>
+    <fieldset><legend class="label">Tire</legend>
       <div class="f"><label for="tw">Width</label><input id="tw" type="number" min="145" max="345" step="10"><span class="u">mm</span></div>
       <div class="f"><label for="ar">Aspect ratio</label><input id="ar" type="number" min="25" max="80" step="5"><span class="u">%</span></div>
     </fieldset>
     <fieldset><legend class="label">Stance</legend>
-      <div class="f"><label for="rh">Hub centre to fender lip</label><input id="rh" type="number" min="200" max="460" step="5"><span class="u">mm</span></div>
+      <div class="f"><label for="rh">Hub center to fender lip</label><input id="rh" type="number" min="200" max="460" step="5"><span class="u">mm</span></div>
       <div class="f"><label for="camber">Camber</label><input id="camber" type="number" min="-12" max="4" step="0.1"><span class="u">deg</span></div>
       <div class="f"><label for="arm">Lower arm, longer by</label><input id="arm" type="number" min="-15" max="70" step="1"><span class="u">mm</span></div>
       <p class="hint" id="stanceNote"></p>
@@ -249,18 +253,18 @@ td:first-child,th:first-child{padding-left:0}
   <div class="grid">
     <section class="card"><header><h2 class="display-title">Front axle</h2><span id="vF"></span></header><dl class="cp-spec tech-data" id="outF"></dl></section>
     <section class="card"><header><h2 class="display-title">Rear axle</h2><span id="vR"></span></header><dl class="cp-spec tech-data" id="outR"></dl></section>
-    <section class="card"><header><h2 class="display-title">Front cut</h2><span class="cp-badge label">At the axle</span></header><canvas class="cut" id="cutF" aria-label="Cross-section through the front axle: fender, tyre and wheel, seen from the front."></canvas></section>
-    <section class="card"><header><h2 class="display-title">Rear cut</h2><span class="cp-badge label">At the axle</span></header><canvas class="cut" id="cutR" aria-label="Cross-section through the rear axle: fender, tyre and wheel, seen from the front."></canvas></section>
+    <section class="card"><header><h2 class="display-title">Front cut</h2><span class="cp-badge label">At the axle</span></header><canvas class="cut" id="cutF" aria-label="Cross-section through the front axle: fender, tire and wheel, seen from the front."></canvas></section>
+    <section class="card"><header><h2 class="display-title">Rear cut</h2><span class="cp-badge label">At the axle</span></header><canvas class="cut" id="cutR" aria-label="Cross-section through the rear axle: fender, tire and wheel, seen from the front."></canvas></section>
     <section class="card wide"><h2 class="display-title">What the numbers mean</h2>
       <ul>
-        <li><b>Poke / tuck</b> is how far the outermost part of the tyre or rim, in the top third of the wheel, sits outside or inside the fender lip at the top of the arch.</li>
-        <li><b>Tyre to lip</b> is the smallest gap between the tyre and the lip, measured only where the tyre sits under the lip (from the lip edge to 22 mm inboard). <b>Bump to lip</b> is how far the wheel can travel up before that gap closes.</li>
-        <li><b>At lock</b> is the smallest tyre-to-lip gap while the front wheels sweep from full left to full right at this ride height.</li>
+        <li><b>Poke / tuck</b> is how far the outermost part of the tire or rim, in the top third of the wheel, sits outside or inside the fender lip at the top of the arch.</li>
+        <li><b>Tire to lip</b> is the smallest gap between the tire and the lip, measured only where the tire sits under the lip (from the lip edge to 22 mm inboard). <b>Bump to lip</b> is how far the wheel can travel up before that gap closes.</li>
+        <li><b>At lock</b> is the smallest tire-to-lip gap while the front wheels sweep from full left to full right at this ride height.</li>
         <li>The red line on the car is the lip the tool measures to. It is found from the 3D body, so flares move it.</li>
         <li><b>Not checked:</b> the inside of the wheel well, the strut or coilover, the brake caliper against the spokes, and the arms. The wheel wells in these 3D files are not true to the real cars. Use "inner vs factory" to judge the inside.</li>
         <li>The wheel face is a flat picture. Spoke shape, concavity and caliper clearance are not modelled.</li>
-        <li>Camber and the lower arm are set by hand. Camber does not change with ride height here, and the tyre is not squashed by load.</li>
-        <li>Tyre width on a rim other than its measuring rim is a rule of thumb: about 5 mm per half inch of rim width.</li>
+        <li>Camber and the lower arm are set by hand. Camber does not change with ride height here, and the tire is not squashed by load.</li>
+        <li>Tire width on a rim other than its measuring rim is a rule of thumb: about 5 mm per half inch of rim width.</li>
       </ul>
     </section>
     <section class="card wide"><h2 class="display-title">Where the cars come from</h2>

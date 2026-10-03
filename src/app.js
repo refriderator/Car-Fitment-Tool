@@ -162,15 +162,15 @@
     for (const ax of ["F", "R"]) {
       const r = fit[ax], s = state.spec[ax], d = r.dims, rows = [];
       const row = (k, v, bad) => rows.push("<dt>" + k + "</dt><dd" + (bad ? ' class="bad"' : "") + ">" + v + "</dd>");
-      row("Wheel", wheelTxt(s)); row("Tyre", tyreTxt(s));
+      row("Wheel", wheelTxt(s)); row("Tire", tyreTxt(s));
       row(r.poke >= 0 ? "Poke" : "Tuck", mm(Math.abs(r.poke)));
-      row("Tyre top to lip", r.archGap >= 0 ? mm(r.archGap) + " below" : mm(-r.archGap) + " above");
-      if (r.tucked) row("Tyre to lip", "inside the lip");
-      else row("Tyre to lip", r.lipGap > 0 ? mm(r.lipGap) : "overlaps " + mm(-r.lipGap) + ", " + r.lipWhere, r.lipGap <= 0);
+      row("Tire top to lip", r.archGap >= 0 ? mm(r.archGap) + " below" : mm(-r.archGap) + " above");
+      if (r.tucked) row("Tire to lip", "inside the lip");
+      else row("Tire to lip", r.lipGap > 0 ? mm(r.lipGap) : "overlaps " + mm(-r.lipGap) + ", " + r.lipWhere, r.lipGap <= 0);
       row("Bump to lip", r.travel === 0 ? "touching" : r.travel == null ? "over 160 mm" : r.travel + " mm, " + r.travelWhere, r.travel === 0);
       if (r.lock) row("At lock", r.lock.g > 1e8 ? "inside the lip" : r.lock.g > 0 ? mm(r.lock.g) + " at " + Math.abs(r.lock.at) + "°" : "overlaps " + mm(-r.lock.g) + " at " + Math.abs(r.lock.at) + "°", r.lock.g <= 0);
       row("Outer vs factory", mm(r.outerVsFactory, true)); row("Inner vs factory", r.innerVsFactory > 0 ? mm(r.innerVsFactory) + " closer in" : r.innerVsFactory < 0 ? mm(-r.innerVsFactory) + " further out" : "same");
-      row("Tyre on rim", Math.abs(d.stretch) < 0.01 ? "on its measuring rim" : Math.abs(d.stretch).toFixed(1) + " in " + (d.stretch > 0 ? "stretched" : "pinched"), Math.abs(d.stretch) > 1.5);
+      row("Tire on rim", Math.abs(d.stretch) < 0.01 ? "on its measuring rim" : Math.abs(d.stretch).toFixed(1) + " in " + (d.stretch > 0 ? "stretched" : "pinched"), Math.abs(d.stretch) > 1.5);
       row("Section width", mm(d.sec)); row("Diameter", Math.round(d.OD) + " mm, " + (r.odVsFactory >= 0 ? "+" : "") + (r.odVsFactory / (d.OD - r.odVsFactory) * 100).toFixed(1) + " %");
       row("Speedo reads", (r.speedo >= 0 ? "+" : "") + r.speedo.toFixed(1) + " %"); row("Track", Math.round(r.track) + " mm");
       $("out" + ax).innerHTML = rows.join(""); $("v" + ax).innerHTML = badge(r.verdict);
@@ -241,7 +241,7 @@
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(() => { btn.textContent = "Copied"; setTimeout(() => btn.textContent = "Copy spec", 1400); }, fail); else fail();
     });
     $("face").addEventListener("change", () => { const f = $("face").files[0]; if (!f) return; const rd = new FileReader(); rd.onload = () => { const im = new Image(); im.onload = () => { setFace(im); $("faceNote").textContent = "Showing your photo on all four wheels."; }; im.onerror = () => { $("faceNote").textContent = "That file is not an image the browser can read. Try a PNG or JPG."; }; im.src = rd.result; }; rd.readAsDataURL(f); });
-    $("faceOff").addEventListener("click", () => { $("face").value = ""; setFace(null); $("faceNote").textContent = "Square photo, wheel centred, taken straight on. A PNG with a clear background shows the brake behind."; });
+    $("faceOff").addEventListener("click", () => { $("face").value = ""; setFace(null); $("faceNote").textContent = "Square photo, wheel centered, taken straight on. A PNG with a clear background shows the brake behind."; });
     window.addEventListener("resize", () => { if (mesh) { drawCut("F"); drawCut("R"); } });
   }
   function readoutsLater() { if (mesh) readouts(); }
@@ -249,12 +249,12 @@
     const row = (a, b, c) => "<tr><td>" + a + "</td><td>" + b + "</td><td>" + c + "</td></tr>", f = car.factory;
     const fw = q => q.d + "x" + q.j + " ET+" + q.et + ", " + q.tw + "/" + q.ar + "R" + q.d;
     const SRC = {
-      nb: ['Track and tyre: <a href="https://cars.japanesecartrade.com/detail/mazda/roadster/rs/167362">Japanese Car Trade, GF-NB8C RS</a>. Wheel width and offset: carried over from your suspension simulator, not re-checked today.'],
+      nb: ['Track and tire: <a href="https://cars.japanesecartrade.com/detail/mazda/roadster/rs/167362">Japanese Car Trade, GF-NB8C RS</a>. Wheel width and offset: carried over from your suspension simulator, not re-checked today.'],
       gr: ['<a href="https://cars-japan.net/wheel/n001120892.html">Cars Japan, ZN8 wheel data</a> and <a href="https://spectank.jp/bdy/001120888.html">Spec Tank, ZN8 body data</a>.'],
       is: ['Track: <a href="https://s3.amazonaws.com/cms.ipressroom.com/197/files/20144/2002_IS_300_specs_eng.pdf">Lexus 2002 IS 300 specification sheet</a>. 17x7 with +50 offset: <a href="https://www.clublexus.com/forums/is-1st-gen-2001-2005/297455-wheel-offset.html">ClubLexus forum</a>, one source only.']
     }[state.car];
     $("src").innerHTML = "<tr><th>" + car.name + " " + car.code + "</th><th>Value</th><th>Source</th></tr>" +
-      row("Factory track, front / rear", f.F.track + " / " + f.R.track + " mm", SRC[0]) + row("Factory wheel and tyre", fw(f.F) + (fw(f.F) === fw(f.R) ? "" : " / " + fw(f.R)), "Same") +
+      row("Factory track, front / rear", f.F.track + " / " + f.R.track + " mm", SRC[0]) + row("Factory wheel and tire", fw(f.F) + (fw(f.F) === fw(f.R) ? "" : " / " + fw(f.R)), "Same") +
       row("Starting wheels", wheelTxt(car.start.F) + " " + tyreTxt(car.start.F) + " / " + wheelTxt(car.start.R) + " " + tyreTxt(car.start.R), state.car === "gr" ? "Factory" : "Close to what the 3D file wears. A guess, not a record of the build.") +
       row("Suspension", car.susp.F.type + " / " + car.susp.R.type, "Physics data in the 3D file" + (state.car === "is" ? "; front type corrected from the Lexus sheet" : ""));
   }

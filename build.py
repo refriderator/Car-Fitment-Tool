@@ -7,7 +7,7 @@ def face(fam, file, w):
     b = base64.b64encode(open(os.path.join(here, 'fonts', file), 'rb').read()).decode()
     return '@font-face{font-family:"%s";src:url(data:font/woff2;base64,%s) format("woff2");font-weight:%d;font-style:normal;font-display:swap}' % (fam, b, w)
 fonts = '\n'.join([face('Michroma', 'Michroma-Regular.woff2', 400), face('Chakra Petch', 'ChakraPetch-Regular.woff2', 400),
-                   face('Chakra Petch', 'ChakraPetch-Medium.woff2', 500), face('VT323', 'VT323-Regular.woff2', 400)])
+                   face('Chakra Petch', 'ChakraPetch-Medium.woff2', 500), face('VT323', 'VT323-Regular.woff2', 400), face('STXingkai', 'STXingkai-Latin.woff2', 400)])
 src = lambda n: open(os.path.join(here, 'src', n)).read()
 body = src('page.html').replace('/*FONTS*/', fonts).replace('/*CORE*/', src('core.js')).replace('/*APP*/', src('app.js'))
 open(os.path.join(here, 'artifact.html'), 'w').write(body)
